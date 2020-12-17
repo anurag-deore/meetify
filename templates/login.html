@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+{% block title %} Sign In | Meetify {% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light " style="margin-bottom: 1px;">
+    <div class="container-fluid" id="navContainer">
+        <a class="logo theme-color" href="{{url_for('home')}}">Meetify</a>
+    </div>
+</nav>
+<div class="container mt-5">
+    <div id="like_button_container"></div>
+</div>
+<script type="text/babel">
+
+    const App = () => {
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [loading,setLoading] = React.useState('none');
+
+    function validateForm() {
+        return email.length > 0 && password.length > 0;
+    }
+    const makeLoginRequest = (e) =>{
+        e.preventDefault();
+        if(loading === 'success' || loading === 'loading') {return;}
+        setLoading('loading');
+        fetch(
+            "/loginRequest", 
+            {   method: "POST",
+                body:JSON.stringify({ email,password }),
+                headers: { "Content-type": "application/json; charset=UTF-8"}
+            })
+            .then(function(response) {
+                if (!response.ok) throw {name:response.status}
+                return response.json();
+            })
+            .then(json => {
+                setLoading('success');
+                setTimeout(() => {window.location.replace('/dashboard');}, 1000);
+            })
+            .catch(err => {
+                err.name === 403 ? setLoading('error_invalid') : setLoading('error_notfound');
+            });
+    }
+
+    const renderSwitch = () => {
+        switch(loading) {
+            case 'none':
+            return 'Sign In';
+            case 'loading':
+            return (<div className="d-flex align-items-center justify-content-center">
+                        <div className="spinner-border spinner-border-sm text-dark" role="status"><span className="sr-only">Loading...</span></div>
+                        <span className="mx-2">Loading</span>
+                    </div>);
+            case 'success':
+            return (<div className="d-flex align-items-center  justify-content-center text-success alert-success">
+                        <span className="mdi mdi-checkbox-marked-circle-outline"></span>
+                        <span className="mx-2">Success!</span>
+                        <small>Redirecting... </small>
+                    </div>);
+            case 'error_invalid':
+                return 'Error';
+            case 'error_notfound':
+                return 'Error';
+            default:
+                return;
+        }
+    }
+    const renderButtonColor = () => {
+        switch(loading) {
+            case 'success':
+                return 'alert-success';
+            case 'error':
+                return 'alert-danger';
+            default:
+                return;
+        }
+    }
+
+    return (
+        <React.Fragment>
+        <div className="">
+        <h3 className="text-center h1 font-weight-bold">Sign In</h3>
+        {loading ==='error_invalid' && <p className="alert alert-danger text-center ">Invalid Email or Password</p> }
+        {loading ==='error_notfound' && <p className="alert alert-danger text-center ">Email does not exist</p> }
+        <form action="" method="POST" onSubmit={makeLoginRequest}>
+                <div className="form-group mt-4">
+                    <label>Email address</label>
+                    <input
+                        autoFocus
+                        autoComplete="on"
+                        type="email"
+                        name="email"
+                        className="form-control"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div className="form-group mt-4">
+                    <label>Password</label>
+                    <input 
+                        type="password"
+                        autoComplete="on"
+                        name="password"
+                        className="form-control"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)} />
+                </div>
+
+                <button type="submit" disabled={!validateForm() || loading==='loading' ||loading==='success' } className={`mt-4 btn border border-dark ${renderButtonColor()} btn-block`}>
+                    {renderSwitch()}
+                </button>
+                <p className="forgot-password pt-2  mt-2">
+                    New to Meetify? <a href="/register">Sign Up Now</a>
+                </p>
+            </form>
+        </div>
+        </React.Fragment>
+    );
+    }
+
+    const domContainer = document.querySelector("#like_button_container");
+    ReactDOM.render(<App />, domContainer);
+
+</script>
+{% endblock %}

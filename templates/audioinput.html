@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block styles %}
+
+<style>
+    .card{
+        background: transparent;
+    }
+</style>
+
+{% endblock styles %}
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-center align-items-center">
+        <div class="card p-3 shadow">
+            <div class="card-body">
+                <h2>Select File</h2>
+                <br>
+                <form enctype="multipart/form-data" method="POST">
+                    <div class="custom-file">
+                        <input type="file" id="fileInput" name="file" onchange="showname()" class="custom-file-input" />
+                        <label class="custom-file-label" id="filelabel" for="customFile">Choose file</label>
+                    </div>
+                    <button class="btn btn-block mt-3 btn-secondary" type="submit">Get Transcript</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script>
+    function showname() {
+        var name = document.getElementById('fileInput');
+        $('#filelabel').text(name.files.item(0).name);
+    };
+</script>
+{% endblock %}

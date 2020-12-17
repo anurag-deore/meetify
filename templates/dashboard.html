@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block title %} Dashboard | Meetify {% endblock %}
+{% block styles %}
+<style>
+    .table thead{
+        /* background-color: #00ccff30; */
+        background-color: rgba(0,118,255,0.1);
+        line-height: 3rem;
+    }
+    .table tbody>tr{
+        line-height: 4rem; 
+    }
+</style>
+{% endblock %}
+<!--  -->
+<!--  -->
+{% block content %}
+
+<div id="dashboard" ></div>
+<!--  -->
+<!--  -->
+<script src="../static/HeaderComponent.js"></script>
+<script type="text/babel">
+    const myJSON = [
+        {"key":"1","title":"Meeting 1", "date":"Nov 09, 2020", "id":"loo-ksjd-lop"},
+        {"key":"2","title":"meeting 2", "date":"Oct 11, 2020", "id":"mkp-jsjd-lod"},
+        {"key":"3","title":"Meeting 3", "date":"Dec 23, 2020", "id":"koi-jajs-vvv"}];
+        // 
+        // 
+        // 
+    const App = () => {
+    const [dmenuOpen, setdmenuOpen] = React.useState(false);
+    function validateForm() {
+        return email.length > 0 && password.length > 0 && password ===confirmPassword;
+    }
+
+    return (
+        <React.Fragment> 
+            <Header />
+            <div className="container">
+            <h2 className="my-4">Your Transcripts</h2>
+            <table className="table table-borderless text-center">
+                <thead>
+                    <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Meet Title </th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Meet-Id</th>
+                    <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {myJSON.map((meet,index)=>(
+                        <tr className="p-5" key={meet.id+index}>
+                            <th scope="row">{index+1}</th>
+                            <td>{meet.title}</td>
+                            <td>{meet.date}</td>
+                            <td>{meet.id}</td>
+                            <td><a href={"/meetDetails/"+meet.key}>View</a></td>
+                        </tr>
+                    ))}
+                
+                </tbody>
+            </table>      
+        </div>
+        </React.Fragment>
+        );
+    }
+
+    const domContainer = document.querySelector("#dashboard");
+    ReactDOM.render(<App />, domContainer);
+
+</script>
+{% endblock %}

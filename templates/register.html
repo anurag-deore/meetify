@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block title %} Register | Meetify {% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light " style="margin-bottom: 1px;">
+    <div class="container-fluid" id="navContainer">
+        <a class="logo theme-color" href="{{url_for('home')}}">Meetify</a>
+    </div>
+</nav>
+<div id="registerContainer" class="container"></div>
+<script type="text/babel">
+
+    const App = () => {
+    const [email, setEmail] = React.useState("");
+    const [name, setName] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [confirmPassword, setConfirmPassword] = React.useState("");
+    const [loading,setLoading] = React.useState('none');
+
+    function validateForm() {
+        return email.length > 0 && password.length > 0 && password === confirmPassword;
+    }
+
+    const makeRegisterRequest = (e) =>{
+        e.preventDefault();
+        if(loading === 'success' || loading === 'loading') {return;}
+        setLoading('loading');
+        fetch(
+            "/registerRequest", 
+            {   method: "POST",
+                body:JSON.stringify({ email,password,name }),
+                headers: { "Content-type": "application/json; charset=UTF-8"}
+            })
+            .then(function(response) {
+                if (!response.ok) {throw new Error("HTTP status " + response.status);}
+                return response.json();
+            })
+            .then(json => {
+                setLoading('success');
+                setTimeout(() => window.location.replace('/dashboard'), 1000);
+            })
+            .catch(err => {setLoading('error')});
+    }
+
+    const renderSwitch = () => {
+        switch(loading) {
+            case 'none':
+                return 'Sign Up';
+            case 'loading':
+                return (<div className="d-flex align-items-center justify-content-center">
+                            <div className="spinner-border spinner-border-sm text-dark" role="status"><span className="sr-only">Loading...</span></div>
+                            <span className="mx-2">Loading</span>
+                        </div>);
+            case 'success':
+                return (<div className="d-flex align-items-center  justify-content-center text-success alert-success">
+                            <span className="mdi mdi-checkbox-marked-circle-outline"></span>
+                            <span className="mx-2">Success!</span>
+                            <small>Redirecting... </small>
+                        </div>);
+            case 'error':
+                return 'Error';
+            default:
+                return;
+        }
+    }
+    const renderButton = () => {
+        switch(loading) {
+            case 'success':
+            return 'alert-success';
+            case 'error':
+            return 'alert-danger';
+            default:
+            return;
+        }
+    }
+
+    return (
+        <React.Fragment>
+        <div className="">
+        <h3 className="text-center h1 font-weight-bold">Sign Up</h3>
+        <form action="" method="POST" onSubmit={makeRegisterRequest}>
+                <div className="form-group mt-4">
+                    <label>Email</label>
+                    {loading ==='error' && <p className="text-danger small">Email already exists. Please <a href="/login">Sign In</a> to continue.</p> }
+                    <input
+                        autoFocus
+                        autoComplete="on"
+                        type="email"
+                        name="email"
+                        className="form-control"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div className="form-group mt-4">
+                    <label>Profile Name </label>
+                    <input
+                        autoComplete="on"
+                        type="text"
+                        name="name"
+                        className="form-control"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)} />
+                </div>
+                <div className="form-group mt-4">
+                    <label>Password</label>
+                    <input 
+                        type="password"
+                        autoComplete="on"
+                        name="password"
+                        className="form-control"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)} />
+                    </div>
+                    <div className="form-group mt-4">
+                    <label>Confirm Password</label>
+                    <input 
+                        type="password"
+                        autoComplete="on"
+                        name="confirmPassword"
+                        className="form-control"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)} />
+                </div>
+
+                <button type="submit" disabled={!validateForm() || loading==='loading' ||loading==='success' } className={`mt-4 btn border border-dark ${renderButton()} btn-block`}>
+                    {renderSwitch()}
+                </button>
+            </form>
+        </div>
+        </React.Fragment>
+    );
+    }
+
+    const domContainer = document.querySelector("#registerContainer");
+    ReactDOM.render(<App />, domContainer);
+
+</script>
+{% endblock %}

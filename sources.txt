@@ -1,0 +1,6 @@
+https://docs.python.org/3.7/library/wave.html
+https://www.pragnakalp.com/speech-recognition-speech-to-text-python-using-google-api-wit-ai-ibm-cmusphinx/
+https://stackoverflow.com/questions/58249587/getting-the-following-typeerror-init-got-an-unexpected-keyword-argument
+https://www.analyticsvidhya.com/blog/2020/06/nlp-project-information-extraction/
+
+https://towardsdatascience.com/speaker-diarization-with-kaldi-e30301b05cc8

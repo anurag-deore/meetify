@@ -1,0 +1,243 @@
+{% extends "layout.html" %}
+{% block title %} Dashboard | Meetify {% endblock %}
+{% block styles %}
+<style>
+    .cardmodal {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2220;
+    }
+
+    ::-webkit-scrollbar {
+        width: 0.2rem;
+        height: 0.5rem
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background-color: #ccc;
+    }
+
+    .cardmodal-body span {
+        color: rgb(109, 192, 98);
+        font-size: 5rem;
+    }
+
+    .cardmodal-body {
+        border-radius: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: aliceblue;
+        width: max-content;
+        padding: 2rem;
+    }
+
+    a.okay {
+        text-align: center;
+        background-color: #000;
+        color: #fff;
+        text-decoration: none;
+        padding: 7px 15px;
+        border: 2px solid transparent;
+    }
+
+    .userList {
+        background-color: rgb(252, 252, 252);
+        overflow: auto;
+        height: 150px;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        overflow-y: scroll;
+    }
+
+    .userChip:hover {
+        background-color: #f7f7f7;
+    }
+
+    .userChip {
+        display: flex;
+        justify-content: space-between;
+        border-radius: 3px;
+        border: 1px solid #ced4da;
+        background-color: #fff;
+        color: #666;
+        cursor: pointer;
+        padding: 5px 8px;
+        margin-bottom: 5px;
+        text-align: center;
+        font-size: small;
+        margin-right: 8px;
+        font-weight: 500;
+    }
+
+    .userChip:focus {
+        outline: none;
+        border-color: rgb(44, 139, 218);
+    }
+</style>
+{% endblock %}
+<!--  -->
+<!--  -->
+{% block content %}
+<div id="schedule"></div>
+<!--  -->
+<!--  -->
+<script src="../static/HeaderComponent.js"></script>
+<script type="text/babel">
+
+
+    const Schedule = () => {
+        const [title, setTitle] = React.useState("");
+        const [date, setDate] = React.useState("");
+        const [description, setDescription] = React.useState("");
+        const [link, setLink] = React.useState("");
+        const [people, setPeople] = React.useState({{ users| safe}});
+        const [addedPeople, setAddedPeople] = React.useState([]);
+        const [loading, setLoading] = React.useState('none');
+
+    function validateForm() {
+        return title.length > 0 && date.length > 0 && link.length == 12 && !addedPeople.length < 1;
+    }
+
+    function addToUser(id) {
+        const newUser = [id, ...addedPeople];
+        setAddedPeople(newUser);
+        const newList = people.filter((item) => item !== id);
+        setPeople(newList);
+    }
+    function removeFromUser(id) {
+        const newPeople = [id, ...people];
+        setPeople(newPeople);
+        const newList = addedPeople.filter((item) => item !== id);
+        setAddedPeople(newList);
+    }
+
+    const addScheduleRequest = (e) => {
+        e.preventDefault();
+        if (loading === 'success' || loading === 'loading') { return; }
+        setLoading('loading');
+        var desc = description === '' ? 'NA' : description;
+        fetch(
+            "/scheduleRequest",
+            {
+                method: "POST",
+                body: JSON.stringify({ title, date, desc, link, addedPeople }),
+                headers: { "Content-type": "application/json; charset=UTF-8" }
+            })
+            .then(function (response) {
+                if (!response.ok) throw { name: response.status }
+                return response.json();
+            })
+            .then(json => {
+                setLoading('success');
+                setTitle(''); setDate(''); setLink(''); setDescription('');
+            })
+            .catch(err => {
+                setLoading('error_incorrect')
+            });
+    }
+
+    return (
+        <React.Fragment>
+            <Header />
+            <div className="container">
+                <h2 className="my-5 font-weight-bold text-center">Schedule New Meet</h2>
+                <div className="card bg-white shadow p-4">
+                    <form action="" method="POST" onSubmit={addScheduleRequest}>
+                        <div className="row g-3">
+                            <div className="col-md-6 col-12">
+                                <label>Title</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)} />
+                                <br />
+                                <label>Meet Date</label>
+                                <input
+                                    type="datetime-local"
+                                    className="form-control"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)} />
+                            </div>
+                            <div className="col-md-6 col-12">
+                                <br className="d-md-none d-sm-block" />
+                                <label className="form-label">Meet Description</label>
+                                <input
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    className="form-control" />
+                                <br />
+                                <label>Meet ID</label>
+                                {link.length > 12 ? <small className="text-danger"> &nbsp;&nbsp;Id should be only 10 characters</small> : ''}
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={link}
+                                    onChange={(e) => setLink((e.target.value).replace(/(\w{3})\-?(\w{4})\-?(\w{3})/, '$1-$2-$3'))} />
+                                <br />
+                            </div>
+                            <div className="col-12 border-bottom">
+                                <label className="form-label ">Add People {addedPeople.length <= 0 ? null : <small>[ Click Again to Remove ]</small>}</label>
+                            </div>
+                            <div className="col-6 mt-1">
+                                <div className=" userList">
+                                    {people.map((ele, index) => {
+                                        return (
+                                            <p 
+                                            tabIndex={3 + parseInt(index)} 
+                                            title={`Add ${ele.name}`} 
+                                            className="userChip" 
+                                            onClick={() => addToUser(ele)} key={ele._id}>
+                                                <span>{ele.name}</span>
+                                                <span>+</span>
+                                            </p>)
+                                    })}
+                                </div>
+                            </div>
+                            <div className="col-6 mt-1">
+                                <div className="userList">
+                                    {addedPeople.length <= 0 ? <small className="text-muted">Add user from the list</small> : addedPeople.map((ele, index) => {
+                                        return (
+                                            <p 
+                                            tabIndex={99 + parseInt(index)} 
+                                            onClick={() => removeFromUser(ele)} 
+                                            key={ele._id} 
+                                            className="userChip">
+                                                <span>{ele.name}</span>
+                                                <span>x</span>
+                                            </p>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                            <br />
+                            <div className="col-12 mt-3">
+                                <button type="submit" disabled={!validateForm()} className={`newbtn mr-4`}>Schedule</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div className={`modal-backdrop fade ${loading == 'success' ? 'show' : 'd-none'}`}></div>
+            <div className={`cardmodal fade ${loading == 'success' ? 'show' : 'd-none'}`}>
+                <div className="cardmodal-body">
+                    <span className="mdi mdi-checkbox-marked-circle-outline"></span>
+                    <h3>Meet Schedule Added</h3>
+                    <br />
+                    <a href="{{url_for('dashboard')}}" className="okay btn-block">Okay</a>
+                </div>
+            </div>
+        </React.Fragment>
+    );
+    }
+    const domContainer = document.querySelector("#schedule");
+    ReactDOM.render(<Schedule />, domContainer);
+
+</script>
+{% endblock %}

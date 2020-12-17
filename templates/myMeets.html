@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+{% block title %} Dashboard | Meetify {% endblock %}
+{% block styles %}
+<style>
+    .startbtn {
+        background-color: #024DBC;
+        color: #fff;
+        text-decoration: none;
+        padding: 7px 15px;
+        border: 2px solid transparent;
+        border-radius: 5px;
+    }
+
+    .startbtn:disabled {
+        background-color: rgb(187, 184, 184);
+        color: rgb(90, 87, 87);
+        text-decoration: none;
+        padding: 7px 15px;
+        border: 2px solid transparent;
+    }
+
+    .startbtn:hover {
+        opacity: 0.8;
+    }
+
+    .meetCard {
+        background-color: #f6f9fd;
+        color: black;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #adcaf7;
+    }
+
+    .personChip {
+        background-color: #eee;
+        color: rgba(0, 0, 0, 0.4);
+        padding: 3px 8px;
+        font-size: x-small;
+        margin-right: 8px;
+        font-weight: bold;
+        border-radius: 50px;
+    }
+
+    .dataSection {
+        max-width: 70%;
+    }
+
+    .titleCard {
+        font-weight: 500;
+        font-size: 25px;
+        color: #333;
+    }
+
+    .subHeader {
+        color: #024DBC;
+        font-weight: 800;
+        /* border-bottom: 2px dotted #024DBC; */
+        width: fit-content;
+        font-size: 25px;
+    }
+
+    .meetCard:hover {
+        box-shadow: 0 .5rem 1rem rgba(160, 158, 158, 0.15) !important;
+    }
+
+    .dateSection {
+        color: rgba(2, 77, 188, 0.8);
+    }
+
+    @media screen and (max-width: 776px) {
+        .dataSection {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+<!--  -->
+<!--  -->
+{% block content %}
+<div id="myMeets"></div>
+<!--  -->
+<!--  -->
+<script src="../static/HeaderComponent.js"></script>
+<script type="text/babel">
+
+
+    const Schedule = () => {
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+        const [ownmeets, setMeets] = React.useState({{ ownmeets| safe}});
+    const [invited, setInvited] = React.useState({{ invited| safe}});
+    const [loading, setLoading] = React.useState('none');
+    return (
+        <React.Fragment>
+            <Header />
+            <div className="container">
+                <h2 className="my-5 font-weight-bold text-center">Scheduled Meets</h2>
+                <p className="subHeader">Your Schedules</p>
+                {ownmeets.map((item, index) => {
+                    const date = new Date(item.date["$date"])
+                    return (
+                        <div key={index} className="meetCard d-flex justify-content-md-between align-items-md-center flex-md-row flex-column-reverse justify-content-center align-items-between">
+                            <div className="dataSection">
+                                <span className="titleCard text-capitalize">{item.title}</span>
+                                <p className="text-muted">{item.description}</p>
+                                <p>Join Meet : <a href={`https://meet.google.com/${item.meetID}`}>{`https://meet.google.com/${item.meetID}`}</a></p>
+                                <div className="d-flex mt-2">
+                                    {item.people.length <= 3
+                                        ? item.people.map((user) => { return (<span key={user._id} className="personChip">{user.name}</span>) })
+                                        : (<React.Fragment>
+                                            <span className="personChip">{item.people[0].name}</span>
+                                            <span className="personChip">{item.people[1].name}</span>
+                                            <span className="personChip">{item.people[2].name}</span>
+                                            <span className="personChip">+{item.people.length - 3} More</span>
+                                        </React.Fragment>)}
+                                </div>
+                                <button type="submit" className={`startbtn mt-3`}>Start</button>
+                            </div>
+                            <div className="dateSection ">
+                                <h3 className="text-uppercase font-weight-bold">{date.getDate()} {months[date.getMonth()]}, {date.getFullYear()}</h3>
+                                <hr className="d-md-none d-block" />
+                            </div>
+                        </div>);
+                })}
+                <br />
+                <p className="subHeader">Meet Invites</p>
+                {invited.map((item, index) => {
+                    const date = new Date(item.date["$date"])
+                    return (
+                        <div key={index} className="meetCard d-flex justify-content-md-between align-items-md-center flex-md-row flex-column-reverse justify-content-center align-items-between">
+                            <div className="dataSection">
+                                <span className="titleCard text-capitalize">{item.title}</span>
+                                <p className="text-muted">{item.description}</p>
+                                <p>Join Meet : <a href={`https://meet.google.com/${item.meetID}`}>{`https://meet.google.com/${item.meetID}`}</a></p>
+                                <div className="d-flex mt-2">
+                                    <span className="personChip">Anurag Deore</span>
+                                    <span className="personChip">Aniket Kamble</span>
+                                    <span className="personChip">Omkar Bhiwande</span>
+                                    <span className="personChip">+5 More</span>
+                                </div>
+                            </div>
+                            <div className="dateSection">
+                                <h3 className="text-uppercase font-weight-bold">{date.getDate()} {months[date.getMonth()]}, {date.getFullYear()}</h3>
+                                <hr className="d-md-none d-block" />
+                            </div>
+                        </div>);
+                })}
+            </div>
+        </React.Fragment>
+    );
+    }
+    const domContainer = document.querySelector("#myMeets");
+    ReactDOM.render(<Schedule />, domContainer);
+
+</script>
+{% endblock %}

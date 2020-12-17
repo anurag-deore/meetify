@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="card mb-3 shadow" style="background-color: #c6e0f5;">
+        <div class="card-body text-dark ">
+            <h3 class="card-title">Transcribed Text from Audio</h3>
+            <hr>
+            <p class="card-text">{{text['results'][0]['alternatives'][0]['transcript']}} </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

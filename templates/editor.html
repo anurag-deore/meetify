@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css"
+        integrity="sha384-DhY6onE6f3zzKbjUPRc2hOzGAdEf4/Dz+WJwBvEYL/lkkIsI3ihufq9hk9K4lVoK" crossorigin="anonymous">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css"
+        integrity="sha512-QKC1UZ/ZHNgFzVKSAhV5v5j73eeL9EEN289eKAEFaAjgAiobVAnVv/AGuPbXsKl1dNoel3kNr6PYnSiTzVVBCw=="
+        crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{url_for('static',filename='styles.css')}}">
+    <title>Document</title>
+</head>
+
+<body class="dark">
+    <nav class="navbar navbar-expand-lg navbar-light " style="margin-bottom: 1px;">
+        <div class="container-fluid">
+            <a class="navbar-brand ml-3" style="font-size: 30px;" href="#"> ∆i </a>
+            <a href="#" id="sun" class="nav-link h4">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-moon" fill="#111"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                        d="M14.53 10.53a7 7 0 0 1-9.058-9.058A7.003 7.003 0 0 0 8 15a7.002 7.002 0 0 0 6.53-4.47z" />
+                </svg>
+            </a>
+            <a href="#" id="moon" class="nav-link d-none h4">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-sun" fill="#eee"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.5 8a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0z" />
+                    <path fill-rule="evenodd"
+                        d="M8.202.28a.25.25 0 0 0-.404 0l-.91 1.255a.25.25 0 0 1-.334.067L5.232.79a.25.25 0 0 0-.374.155l-.36 1.508a.25.25 0 0 1-.282.19l-1.532-.245a.25.25 0 0 0-.286.286l.244 1.532a.25.25 0 0 1-.189.282l-1.509.36a.25.25 0 0 0-.154.374l.812 1.322a.25.25 0 0 1-.067.333l-1.256.91a.25.25 0 0 0 0 .405l1.256.91a.25.25 0 0 1 .067.334L.79 10.768a.25.25 0 0 0 .154.374l1.51.36a.25.25 0 0 1 .188.282l-.244 1.532a.25.25 0 0 0 .286.286l1.532-.244a.25.25 0 0 1 .282.189l.36 1.508a.25.25 0 0 0 .374.155l1.322-.812a.25.25 0 0 1 .333.067l.91 1.256a.25.25 0 0 0 .405 0l.91-1.256a.25.25 0 0 1 .334-.067l1.322.812a.25.25 0 0 0 .374-.155l.36-1.508a.25.25 0 0 1 .282-.19l1.532.245a.25.25 0 0 0 .286-.286l-.244-1.532a.25.25 0 0 1 .189-.282l1.508-.36a.25.25 0 0 0 .155-.374l-.812-1.322a.25.25 0 0 1 .067-.333l1.256-.91a.25.25 0 0 0 0-.405l-1.256-.91a.25.25 0 0 1-.067-.334l.812-1.322a.25.25 0 0 0-.155-.374l-1.508-.36a.25.25 0 0 1-.19-.282l.245-1.532a.25.25 0 0 0-.286-.286l-1.532.244a.25.25 0 0 1-.282-.189l-.36-1.508a.25.25 0 0 0-.374-.155l-1.322.812a.25.25 0 0 1-.333-.067L8.203.28zM8 2.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z" />
+                </svg>
+            </a>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="jumbotron align-self-center text-center">
+                Get Your Audio Transcribed in minutes
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center" style="margin-top:5%;">
+        <hr width="90%" class=" text-center">
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <div class="card py-4 shadow" style="width: 100%;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Audio Transcription</h3>
+                            <div>
+                                <a href="{{url_for('audiototext')}}" class="btn border">Continue &#10095;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card py-4 shadow" style="width: 100%;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Live Text To Speech</h3>
+                            <div>
+                                <a href="{{url_for('live')}}" class="btn border">Continue &#10095;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.bundle.min.js"
+        integrity="sha384-BOsAfwzjNJHrJ8cZidOg56tcQWfp6y72vEJ8xQ9w6Quywb24iOsW913URv1IS4GD"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function () {
+            $('#sun').click(function (e) {
+                e.preventDefault();
+                $('body').addClass('dark');
+                $('#sun').toggleClass('d-none');
+                $('#moon').toggleClass('d-none');
+            });
+            $('#moon').click(function (e) {
+                e.preventDefault();
+                $('body').removeClass('dark');
+                $('#moon').toggleClass('d-none');
+                $('#sun').toggleClass('d-none');
+            });
+        });
+    </script>
+
+</body>
+
+</html>

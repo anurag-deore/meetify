@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+{% block title %} Dashboard | Meetify {% endblock %}
+{% block styles %}
+<style>
+    .avatar{
+        color:#fff;
+        font-size: 1.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        margin: 10px 10px 10px 0px;
+        background: rgba(0,118,255,0.9);
+        box-shadow: 0 6px 20px rgba(0,118,255,0.23);
+    }
+    .text{
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .icon{
+        color: #006AE6;
+        font-size: 1.8rem;
+    }
+</style>
+{% endblock %}
+<!--  -->
+<!--  -->
+{% block content %}
+
+<div id="profile"></div>
+<!--  -->
+<!--  -->
+<script src="../static/HeaderComponent.js"></script>
+<script type="text/babel">
+const Profile = () => {
+    const [oldPass, setOldPass] = React.useState("");
+    const [newPassword, setNewPassword] = React.useState("");
+    const [confPassword, setCOnfPassword] = React.useState("");
+    const [loading,setLoading] = React.useState('none');
+    
+    function validateForm() {
+        return newPassword.length > 0 && confPassword.length > 0 && oldPass.length > 0  && newPassword === confPassword;
+    }
+
+    const makePswdChngRequest = (e) =>{
+        e.preventDefault();
+        if(loading === 'success' || loading === 'loading') {return;}
+        setLoading('loading');
+        fetch(
+            "/password_update", 
+            {   method: "POST",
+                body:JSON.stringify({ email:'{{g.user}}',oldpass:oldPass,newpass:newPassword}),
+                headers: { "Content-type": "application/json; charset=UTF-8"}
+            })
+            .then(function(response) {
+                if (!response.ok) throw {name:response.status}
+                return response.json();
+            })
+            .then(json => {
+                setLoading('success');
+                setOldPass('');
+                setNewPassword('');
+                setCOnfPassword('');
+            })
+            .catch(err => {
+                setLoading('error_incorrect')});
+    }
+
+    const renderSwitch = () => {
+        switch(loading) {
+            case 'none':
+            return 'Update';
+            case 'loading':
+            return (<div className="d-flex align-items-center justify-content-center">
+                        <div className="spinner-border spinner-border-sm text-dark" role="status"><span className="sr-only">Loading...</span></div>
+                        <span className="mx-2">Loading</span>
+                    </div>);
+            case 'success':
+            return (<div className="d-flex align-items-center justify-content-center text-success alert-success">
+                        <span className="mdi mdi-checkbox-marked-circle-outline"></span>
+                        <span className="mx-2">Update Success!</span>
+                    </div>);
+            case 'error_incorrect':
+                return 'Update';
+            default:
+                return;
+        }
+    }
+    const renderButtonColor = () => {
+        switch(loading) {
+            case 'success':
+                return 'alert-success';
+            default:
+                return;
+        }
+    }
+
+    return (
+        <React.Fragment>
+            <Header />
+            <div className="container">
+                <h2 className="my-5 font-weight-bold text-center">Profile</h2>
+                <div className="card bg-white shadow p-4">
+                    <div className="d-flex justify-content-start align-items-center">
+                        <div className="avatar"><span className="mdi mdi-account"></span></div>
+                        <span className="text ml-3 text-capitalize">{'{{g.username}}'}</span>
+                    </div>
+                    <div className="d-flex justify-content-start align-items-center">
+                        <div className="avatar"><span className="mdi mdi-email-outline"></span></div>
+                        <span className="text ml-3">{'{{g.email}}'}</span>
+                    </div>
+                    <hr />
+                    <h5 className="text-muted">Update password</h5>
+                    <div className=" ">
+                    {loading ==='error_incorrect' && <p className="alert alert-danger text-center ">Current password is Incorrect</p> }
+                            <form action="" method="POST" onSubmit={makePswdChngRequest}>
+                                <div className="form-group mt-4">
+                                    <label>Current Password</label>
+                                    <input
+                                        type="password"
+                                        autoComplete="on"
+                                        name="password"
+                                        className="form-control"
+                                        value={oldPass}
+                                        onChange={(e) => setOldPass(e.target.value)} />
+                                </div>
+                                <div className="form-group mt-4">
+                                    <label>New Password</label>
+                                    <input 
+                                        type="password"
+                                        autoComplete="on"
+                                        name="password"
+                                        className="form-control"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)} />
+                                </div>
+                                <div className="form-group mt-4">
+                                    <label>Confirm New Password</label>
+                                    <input 
+                                        type="password"
+                                        autoComplete="on"
+                                        name="password"
+                                        className="form-control"
+                                        value={confPassword}
+                                        onChange={(e) => setCOnfPassword(e.target.value)} />
+                                </div>
+                                <button type="submit" disabled={!validateForm() || loading==='loading' ||loading==='success' } className={`mt-4 btn border border-dark ${renderButtonColor()} btn-block`}>
+                                    {renderSwitch()}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    </div>
+        </React.Fragment>
+        );
+    }
+
+    const domContainer = document.querySelector("#profile");
+    ReactDOM.render(<Profile />, domContainer);
+
+</script>
+{% endblock %}

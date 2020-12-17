@@ -16,7 +16,7 @@ def recognize(filename):
         speech_recognition_results = service.recognize(audio=audio_file, content_type='audio/wav').get_result()
     return speech_recognition_results
 
-authenticator = IAMAuthenticator('nsAIMcIUYB01gMM_ohleLSvpUY8diHr8FkRgiBAOadtG')
+authenticator = IAMAuthenticator('YOURKEY')
 service = SpeechToTextV1(
    authenticator=authenticator
 )

@@ -1,0 +1,202 @@
+{% extends "layout.html" %}
+{% block title %} Dashboard | Meetify {% endblock %}
+{% block styles %}
+<style>
+    .cardmodal {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2220;
+    }
+
+    ::-webkit-scrollbar {
+        width: 0.2rem;
+        height: 0.5rem
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background-color: #ccc;
+    }
+
+    .cardmodal-body span {
+        color: rgb(109, 192, 98);
+        font-size: 5rem;
+    }
+
+    .cardmodal-body {
+        border-radius: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: aliceblue;
+        width: max-content;
+        padding: 2rem;
+    }
+
+    a.okay {
+        text-align: center;
+        background-color: #000;
+        color: #fff;
+        text-decoration: none;
+        padding: 7px 15px;
+        border: 2px solid transparent;
+    }
+
+    .userList {
+        background-color: rgb(252, 252, 252);
+        overflow: auto;
+        height: 150px;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        overflow-y: scroll;
+    }
+
+    .userChip:hover {
+        background-color: #f7f7f7;
+    }
+
+    .userChip {
+        display: flex;
+        justify-content: space-between;
+        border-radius: 3px;
+        border: 1px solid #ced4da;
+        background-color: #fff;
+        color: #666;
+        cursor: pointer;
+        padding: 5px 8px;
+        margin-bottom: 5px;
+        text-align: center;
+        font-size: small;
+        margin-right: 8px;
+        font-weight: 500;
+    }
+
+    .userChip:focus {
+        outline: none;
+        border-color: rgb(44, 139, 218);
+    }
+</style>
+{% endblock %}
+<!--  -->
+<!--  -->
+{% block content %}
+<div id="schedule"></div>
+<!--  -->
+<!--  -->
+<script src="../static/HeaderComponent.js"></script>
+<script type="text/babel">
+    const AddMeetInfo = () => {
+        const [selectedFile, setSelectedFile] = React.useState();
+        const [title, setTitle] = React.useState("");
+        const [date, setDate] = React.useState("");
+        const [description, setDescription] = React.useState("");
+        const [isSelected, setIsSelected] = React.useState(false);
+        const [status, setStatus] = React.useState("");
+
+        const changeHandler = (event) => {
+            setSelectedFile(event.target.files[0]);
+            setIsSelected(true);
+        };
+        function validateForm() {
+            return title.length > 0 && date.length > 0 && isSelected == true && selectedFile.name != null;
+        }
+        const handleSubmission = () => {
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('date', date);
+            formData.append('file', selectedFile);
+            setStatus("Uploading...");
+            var kid = "";
+            fetch(
+                '/audio-input',
+                {
+                    method: 'POST',
+                    body: formData,
+                }
+            )
+                .then((response) => response.json())
+                .then((result) => {
+                    if (result.success) {
+                        kid = result.id;
+                        setTitle("");
+                        setStatus("Upload Successful. Processing Started..");
+                        fetch('/startProcessing', { method: 'GET' })
+                            .then((response) => response.json())
+                            .then((result) => { setStatus("Processing done!. Redirecting... "); setTimeout(() => {
+                                window.location.href = '/meetDetails/'+kid;
+                            }, 1000); })
+                            .catch((e) => console.log(e));
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        };
+
+        return (
+            <React.Fragment>
+                <Header />
+                <div className="container mt-4">
+                    <h3 className="my-4">Upload Lecture Video</h3>
+                    <div className="card card-body bg-white shadow-sm">
+                        <div className="row g-3">
+                            <div className="col-md-6 col-12">
+                                <label>Title</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)} />
+                            </div>
+                            <div className="col-md-6 col-12">
+                                <label>Lecture Date</label>
+                                <input
+                                    type="date"
+                                    className="form-control"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)} />
+                            </div>
+                            <div className="col-12 mt-3">
+                                <label className="form-label">Description</label>
+                                <textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    className="form-control" />
+                            </div>
+                            <div className="col-12 mt-3">
+                                <label className="form-label">Select File</label>
+                                <div className="custom-file">
+                                    <input type="file" name="file" onChange={changeHandler} className="custom-file-input" />
+                                    <label className="custom-file-label" id="filelabel" htmlFor="customFile">{isSelected ? selectedFile.name : 'Choose File'}</label>
+                                </div>
+                            </div>
+                            <div className="col-12 mt-3">
+                                <button disabled={!validateForm()} className={`newbtn mr-4`} onClick={handleSubmission}>Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    {status.length > 0 ?
+                        <div className="alert alert-info p-4 text-center">
+                            <div className="spinner-border" role="status">
+                                <span className="visually-hidden"></span>
+                            </div>
+                            <span className="mx-3">{status}</span>
+                        </div>
+                        :
+                        ""
+                    }
+                </div>
+            </React.Fragment>
+        );
+    }
+    const domContainer = document.querySelector("#schedule");
+    ReactDOM.render(<AddMeetInfo />, domContainer);
+
+</script>
+{% endblock %}

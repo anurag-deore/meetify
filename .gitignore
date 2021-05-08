@@ -83,7 +83,11 @@ celerybeat-schedule
 .venv
 env/
 venv/
+uploads/
 ENV/
+models/
+speechToText/
+temp.wav
 
 # Spyder project settings
 .spyderproject

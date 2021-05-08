@@ -1,13 +1,19 @@
 from bson.objectid import ObjectId
 from flask import Flask,render_template,request,redirect,url_for,flash,send_from_directory,jsonify,session,g
+from summarizer.model_processors import Summarizer
 from werkzeug.utils import secure_filename
 import os
+import requests
+import json
+from bson import json_util
 from bson.json_util import dumps
 from flask_pymongo import PyMongo
 from transcription.speech_to_text import recognize
 from werkzeug.security import generate_password_hash,check_password_hash
 import datetime
-
+from transcription.lecture_summarizer import abstractive_sum, extractive, get_transcriptions,convert_to_wav, overlapping_intervals, punctuate_text
+from scipy.io import wavfile
+corpus=""
 ALLOWED_EXTENSIONS = {'wav'}
 
 app = Flask(__name__)
@@ -16,6 +22,8 @@ app.config['SESSION_TYPE'] = 'filesystem'
 # app.config["MONGO_URI"] = "mongodb+srv://Anurag:322KUEf7mJ7DPBKB@anuragscluster.j2ski.mongodb.net/meetify?retryWrites=true&w=majority"
 app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/meetify"
 mongo = PyMongo(app)
+process_filename = 'none'
+process_id = 'none'
 
 @app.before_request
 def before_request():
@@ -127,6 +135,16 @@ def schedule():
     ])
     return render_template('schedule.html',users = dumps(d))
 
+@app.route('/add')
+def addMeetInfo():
+    if not g.email:
+        return redirect(url_for('login'))
+    d = mongo.db.users.aggregate([
+        {"$match": {"_id": {'$ne': g.userID['_id']}}},
+        {'$project': {'_id': {'$toString': "$_id"},'name':1}}
+    ])
+    return render_template('addMeetInfo.html',users = dumps(d))
+
 @app.route('/scheduleRequest',methods=['GET','POST'])
 def scheduleRequest():
     if not g.email:
@@ -159,13 +177,8 @@ def myMeets():
 def dashboard():
     if not g.email:
         return redirect(url_for('login'))
-    if request.method == 'POST':
-        print("REQUEST : \n")
-        print(request.form.to_dict)
-        return redirect('editor')
-    return render_template('dashboard.html')
-
-
+    k = mongo.db.lectures.find()
+    return render_template('dashboard.html',data=k)
 
 
 @app.route('/meetDetails/<key>',methods=['GET','POST'])
@@ -176,7 +189,8 @@ def meetDetails(key):
         print("REQUEST : \n")
         print(request.form.to_dict)
         return redirect('editor')
-    return render_template('meetDetails.html',key=key)
+    k = mongo.db.lectures.find_one({"_id":ObjectId(key)})    
+    return render_template('meetDetails.html',data=k)
 
 
 
@@ -187,31 +201,75 @@ def allowed_file(filename):
 
 @app.route('/audio-input',methods=['GET','POST'])
 def audiototext():
+    global process_filename,process_id
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
+        title = request.form['title']
+        description = request.form['description']
+        date = request.form['date']
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
         if allowed_file(file.filename):
             if file:
-                filename = secure_filename(file.filename)   
+                filename = secure_filename(file.filename)
+                # os.remove(os.path.join("uploads",filename))
                 file.save(os.path.join("uploads",filename))
-                text = recognize(filename)
-                session['text'] = text
-                return redirect(url_for('uploaded_file'))
+                process_filename = filename
+                d = datetime.datetime.strptime(date, "%Y-%m-%d")
+                _id = mongo.db.lectures.insert({'title':title,'description':description,'date':d})
+                process_id = _id
+                return jsonify({'success' : True,"id":str(_id)})
         else:
             flash('Unsupported FileType')
             return redirect(request.url)
     return render_template('audioinput.html')
 
+@app.route('/startProcessing',methods=['GET'])
+def startProcessing():
+    global process_filename,process_id
+    print('\n\n\n\n-------')
+    # newfile = convert_to_wav(process_filename)
+    samplerate, data = wavfile.read(os.path.join("uploads",process_filename))
+    rduration = len(data) / samplerate
+    #print(f"duration = {duration}")'
+    duration=0
+    # if(rduration>300):duration=300
+    # else:
+    duration=rduration
+
+    print(f"duration = {duration}s")
+    all_intervals = overlapping_intervals([0, duration], 1, 15)
+    data = get_transcriptions(os.path.join("uploads",process_filename),all_intervals)
+    url = "http://bark.phon.ioc.ee/punctuator"
+    # text=punctuate_text(corpus)
+    para = ''
+    for j in data['0']['transcripts']:
+        if j != "Google Speech Recognition could not understand audio":
+            para += " "+ j
+    response = requests.post(url,data={"text":para})
+    # extText = extractive(str(response.text))
+    model = Summarizer()
+    result = model(str(response.text), min_length = 60, max_length = 500, ratio = 0.4)
+    bertSum = ''.join(result)
+    absText = abstractive_sum(str(response.text))
+    mongo.db.lectures.update_one({'_id':process_id},{'$set':
+        {
+            'transcription':data,
+            'para':para,
+            "bertSum":bertSum,
+            "absText":absText,
+            'punctuated':str(response.text)
+        }})
+    return data
+
+
 @app.route('/uploads')
 def uploaded_file():
-    return render_template('output.html',text = session['text'])
+    return render_template('output.html',text = 'text')
 
 
 @app.route('/editor')

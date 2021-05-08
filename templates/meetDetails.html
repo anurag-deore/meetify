@@ -2,13 +2,47 @@
 {% block title %} Dashboard | Meetify {% endblock %}
 {% block styles %}
 <style>
-    .table thead {
-        background-color: #00ccff30;
-        line-height: 3rem;
+    .nonscroll {
+        height: 500px;
+        overflow-y: auto;
     }
 
-    .table tbody>tr {
-        line-height: 4rem;
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px transparent;
+        border-radius: 10px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #007bff90;
+        border-radius: 10px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #007bff;
+    }
+
+    fieldset.scheduler-border {
+        border: 1px double #007bff !important;
+        padding: 0 1.4em 1.4em 1.4em !important;
+        margin: 0 0 1.5em 0 !important;
+        -webkit-box-shadow: 0px 0px 0px 0px #000;
+        box-shadow: 0px 0px 0px 0px #000;
+    }
+
+    legend.scheduler-border {
+        font-size: 1.2em !important;
+        font-weight: bold !important;
+        text-align: left !important;
+        width: auto;
+        padding: 0 10px;
+        border-bottom: none;
     }
 </style>
 {% endblock %}
@@ -16,73 +50,99 @@
 <!--  -->
 {% block content %}
 <div id="dashboard"></div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
 <!--  -->
 <script type="text/babel">
-    const myJSON = [
-        {"key":"1","title":"Meeting 1", "date":"Nov 09, 2020", "id":"loo-ksjd-lop"},
-        {"key":"2","title":"meeting 2", "date":"Oct 11, 2020", "id":"mkp-jsjd-lod"},
-        {"key":"3","title":"Meeting 3", "date":"Dec 23, 2020", "id":"koi-jajs-vvv"}];
-        // 
-        // 
-    var j = [`Dudley's birthday - how could he have forgotten? Harry got slowly out of bed and started looking for socks. He found a pair under his bed and, after pulling a spider off one of them, put them on. Harry was used to spiders, because the cupboard under the stairs was full of them, and that was where he slept.`,
-            `When he was dressed he went down the hall into the kitchen. The table was almost hidden beneath all Dudley's birthday presents. It looked as though Dudley had gotten the new computer he wanted, not to mention the second television and the racing bike. Exactly why Dudley wanted a racing bike was a mystery to Harry, as Dudley was very fat and hated exercise - unless of course it involved punching somebody. Dudley's favorite punching bag was Harry, but he couldn't often catch him. Harry didn't look it, but he was very fast.`,
-            `Perhaps it had something to do with living in a dark cupboard, but Harry had always been small and skinny for his age. He looked even smaller and skinnier than he really was because all he had to wear were old clothes of Dudley's, and Dudley was about four times bigger than he was. Harry had a thin face, knobbly knees, black hair, and bright green eyes. He wore round glasses held together with a lot of Scotch tape because of all the times Dudley had punched him on the nose. The only thing Harry liked about his own appearance was a very thin scar on his forehead that was shaped like a bolt of lightning. He had had it as long as he could remember, and the first question he could ever remember asking his Aunt Petunia was how he had gotten it.`];
-        //
-    var notes = [
-                    {"point":"HTML I","key":1 },
-                    {"point":"CSS","key":2 },
-                    {"point":"Responsive design","key":3 },
-                    {"point":"Git","key":4 },
-                    {"point":"JavaScript I","key":5 },
-                    {"point":"JavaScript II","key":6 }
-                ];
-        //
     const App = () => {
-    const kee = '{{key}}';
-    const [dmenuOpen, setdmenuOpen] = React.useState(false);
-    const meet = myJSON[parseInt(kee)-1];
-    function validateForm() {
-        return email.length > 0 && password.length > 0 && password ===confirmPassword;
-    }
-    return (
-        <React.Fragment> 
-            <nav className="navbar navbar-expand-lg  shadow-sm navbar-light "  >
-                <div className="container-fluid" id="navContainer">
-                    <a className="logo theme-color" href="{{url_for('dashboard')}}">Meetify</a>
-                    <div className="float-right d-flex justify-content-center align-items-center">
-                        <button onClick={()=>setdmenuOpen(!dmenuOpen)} className="rounded-0 btn btn-default account-box">
-                            <span className="mdi acc mdi-account-outline"> </span>
-                            {dmenuOpen ? 
-                                <span className="mdi acc mdi-chevron-up"></span> 
-                            :   <span className="mdi acc mdi-chevron-down"></span>}
-                            
-                        </button>
-                        <div className={`dmenu shadow ${dmenuOpen ? "show" : ""}`} id="dmenu">
-                            <a className="dropdown-item" href="#">Profile</a>
-                            <a className="dropdown-item" href="#">Logout</a>
+        const [dmenuOpen, setdmenuOpen] = React.useState(false);
+        const [timeArray, setTimeArray] = React.useState(JSON.parse('{{data["transcription"]["0"].time_stamps|tojson|safe}}'));
+        const [transcriptArray, settranscriptArray] = React.useState(JSON.parse('{{data["transcription"]["0"].transcripts|tojson|safe}}'));
+        function secondsToTime(e) {
+            var h = Math.floor(e / 3600).toString().padStart(2, '0'),
+                m = Math.floor(e % 3600 / 60).toString().padStart(2, '0'),
+                s = Math.floor(e % 60).toString().padStart(2, '0');
+
+            return h + ':' + m + ':' + s;
+        }
+        return (
+            <React.Fragment>
+                <nav className="navbar navbar-expand-lg  shadow-sm navbar-light "  >
+                    <div className="container-fluid" id="navContainer">
+                        <a className="logo theme-color" href="{{url_for('dashboard')}}">Lec2Notes</a>
+                        <div className="float-right d-flex justify-content-center align-items-center">
+                            <button onClick={() => setdmenuOpen(!dmenuOpen)} className="rounded-0 btn btn-default account-box">
+                                <span className="mdi acc mdi-account-outline"> </span>
+                                {dmenuOpen ?
+                                    <span className="mdi acc mdi-chevron-up"></span>
+                                    : <span className="mdi acc mdi-chevron-down"></span>}
+
+                            </button>
+                            <div className={`dmenu shadow ${dmenuOpen ? "show" : ""}`} id="dmenu">
+                                <a className="dropdown-item" href="#">Profile</a>
+                                <a className="dropdown-item" href="#">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <div className="container-fluid mt-4">
+                    <div>
+                        <h3>{'{{data.title}}'}</h3>
+                        <p className="text-muted font-weight-light ">{'{{data.description}}'}</p>
+                    </div>
+                    <hr />
+                    <div className="row">
+                        <div className="col-2">
+                            <div className="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                <a className="nav-link active" id="v-pills-transcription-tab" data-toggle="pill" href="#v-pills-transcription" role="tab" aria-controls="v-pills-transcription" aria-selected="true">Transcript</a>
+                                <a className="nav-link" id="v-pills-timestamp-tab" data-toggle="pill" href="#v-pills-timestamp" role="tab" aria-controls="v-pills-timestamp" aria-selected="false">Timestamps</a>
+                                <a className="nav-link" id="v-pills-summary-tab" data-toggle="pill" href="#v-pills-summary" role="tab" aria-controls="v-pills-summary" aria-selected="false">Summary</a>
+                                <a className="nav-link" id="v-pills-notes-tab" data-toggle="pill" href="#v-pills-notes" role="tab" aria-controls="v-pills-notes" aria-selected="false">Notes</a>
+                            </div>
+                        </div>
+                        <div className="col-10 nonscroll">
+                            <div className="tab-content" id="v-pills-tabContent">
+                                <div className="tab-pane fade show active" id="v-pills-transcription" role="tabpanel" aria-labelledby="v-pills-transcription-tab">
+                                    <fieldset className="scheduler-border">
+                                        <legend className="scheduler-border text-dark">Transcription</legend>
+                                        <p className="text-justify">{'{{data.punctuated}}'}</p>
+                                    </fieldset>
+                                </div>
+                                <div className="tab-pane fade" id="v-pills-timestamp" role="tabpanel" aria-labelledby="v-pills-timestamp-tab">
+                                    <fieldset className="scheduler-border">
+                                        <legend className="scheduler-border text-dark">Transcription with Timestamp</legend>
+                                        {
+                                            timeArray.map((ele, index) => {
+
+                                                return (
+                                                    <div className="card-body border-bottom shadow-sm" key={index}>
+                                                        <i className="text-primary small">{secondsToTime(ele[0])} - </i>
+                                                        {transcriptArray[index] != "Google Speech Recognition could not understand audio" ?
+                                                            <div>{transcriptArray[index]}</div> : ""
+                                                        }
+                                                    </div>
+                                                );
+                                            })
+                                        }
+                                    </fieldset>
+                                </div>
+                                <div className="tab-pane fade" id="v-pills-summary" role="tabpanel" aria-labelledby="v-pills-summary-tab">
+                                    <fieldset className="scheduler-border">
+                                        <legend className="scheduler-border text-dark">{'{{data.title}}'} - Summary</legend>
+                                        <p className="text-justify">{'{{data.bertSum}}'}</p>
+                                    </fieldset>
+                                </div>
+                                <div className="tab-pane fade" id="v-pills-notes" role="tabpanel" aria-labelledby="v-pills-notes-tab">
+                                    <fieldset className="scheduler-border">
+                                        <legend className="scheduler-border text-dark">{'{{data.title}}'} - Notes</legend>
+                                        <p className="text-justify">{'{{data.absText}}'}</p>
+                                    </fieldset>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </nav>
-            <div className="container">
-                <div className="d-flex justify-content-between align-items-center">
-                    <h2 className="my-4">{meet.title}</h2>
-                    <div>
-                        <a className="newbtn mr-4" href="#">Download<span className="mdi mdi-download"></span> </a>
-                    </div>
-                </div>
-                <div className="row">
-                <div className="col-6 text-wrap">
-                    <hr/><h5>Transcript</h5><hr/>
-                    <div className="p-2" >{j.map((ele,index)=><p key={index}>{ele}</p>)}</div>        
-                </div>    
-                <div className="col-6 text-wrap">
-                    <hr/><h5>Notes</h5><hr/>
-                    <ul>{notes.map((ele)=><li key={ele.key}>{ele.point}</li>)}</ul>        
-                </div>    
-                </div>  
-        </div>
-        </React.Fragment>
+            </React.Fragment>
         );
     }
 
@@ -90,4 +150,5 @@
     ReactDOM.render(<App />, domContainer);
 
 </script>
+
 {% endblock %}

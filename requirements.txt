@@ -36,7 +36,6 @@ pipwin==0.5.1
 playsound==1.2.2
 preshed==3.0.5
 punctuator==0.9.6
-PyAudio @ file:///C:/Users/Anurag%20Deore/pipwin/PyAudio-0.2.11-cp37-cp37m-win_amd64.whl
 pydantic==1.7.3
 pydub==0.24.1
 pyjsparser==2.7.1

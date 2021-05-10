@@ -105,7 +105,7 @@
                                 <div className="tab-pane fade show active" id="v-pills-transcription" role="tabpanel" aria-labelledby="v-pills-transcription-tab">
                                     <fieldset className="scheduler-border">
                                         <legend className="scheduler-border text-dark">Transcription</legend>
-                                        <p className="text-justify">{'{{data.punctuated}}'}</p>
+                                        <p className="text-justify">{`{{data.punctuated|safe}}`}</p>
                                     </fieldset>
                                 </div>
                                 <div className="tab-pane fade" id="v-pills-timestamp" role="tabpanel" aria-labelledby="v-pills-timestamp-tab">
@@ -129,13 +129,13 @@
                                 <div className="tab-pane fade" id="v-pills-summary" role="tabpanel" aria-labelledby="v-pills-summary-tab">
                                     <fieldset className="scheduler-border">
                                         <legend className="scheduler-border text-dark">{'{{data.title}}'} - Summary</legend>
-                                        <p className="text-justify">{'{{data.bertSum}}'}</p>
+                                        <p className="text-justify">{`{{data.bertSum|safe}}`}</p>
                                     </fieldset>
                                 </div>
                                 <div className="tab-pane fade" id="v-pills-notes" role="tabpanel" aria-labelledby="v-pills-notes-tab">
                                     <fieldset className="scheduler-border">
                                         <legend className="scheduler-border text-dark">{'{{data.title}}'} - Notes</legend>
-                                        <p className="text-justify">{'{{data.absText}}'}</p>
+                                        <p className="text-justify">{`{{data.absText|safe}}`}</p>
                                     </fieldset>
                                 </div>
                             </div>

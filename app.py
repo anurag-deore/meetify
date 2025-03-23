@@ -19,7 +19,6 @@ ALLOWED_EXTENSIONS = {'wav'}
 app = Flask(__name__)
 app.secret_key = 'super-secret-key'
 app.config['SESSION_TYPE'] = 'filesystem'
-# app.config["MONGO_URI"] = "mongodb+srv://Anurag:322KUEf7mJ7DPBKB@anuragscluster.j2ski.mongodb.net/meetify?retryWrites=true&w=majority"
 app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/meetify"
 mongo = PyMongo(app)
 process_filename = 'none'
